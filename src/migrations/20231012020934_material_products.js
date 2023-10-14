@@ -5,10 +5,10 @@
 exports.up = function(knex) {
     return knex.schema.createTable('material_products', function(table){
         table.increments('material_products_id').primary();
-        table.integer('materials_id').unsigned();
+        table.integer('material_id').unsigned();
         table.integer('product_id').unsigned();
         table.integer('satuan').notNullable();
-        table.foreign('materials_id').references('materials_id').inTable('meterials');
+        table.foreign('material_id').references('material_id').inTable('materials');
         table.foreign('product_id').references('product_id').inTable('products');
     })
 };
