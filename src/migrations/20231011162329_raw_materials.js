@@ -3,8 +3,8 @@
  * @returns { Promise<void> }
  */
 exports.up = function(knex) {
-    return knex.schema.createTable('meterials', function(table){
-        table.increments('materials_id').primary();
+    return knex.schema.createTable('materials', function(table){
+        table.increments('material_id').primary();
         table.string('material_name').notNullable();
         table.integer('supplier_id').unsigned();
         table.integer('price').notNullable();
