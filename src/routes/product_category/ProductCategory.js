@@ -27,11 +27,12 @@ router.post('/productCategory', async (req, res) => {
 router.get('/productCategory', async (req, res) => {
     try {
         const data = await pgDB.query(`SELECT * FROM product_categories`)
-        res.status(200).json({
-            data: data.rows,
-            statusCode: 200,
-            message: 'success'
-        })
+        res.status(200).send(data.rows);
+        // res.status(200).json({
+        //     data: data.rows,
+        //     statusCode: 200,
+        //     message: 'success'
+        // })
     } catch (e) {
         res.status(400).json({
             statusCode: 400,
@@ -76,6 +77,24 @@ router.delete('/productCategory/:id', async (req, res) => {
                 message
             })
         }
+    } catch (e) {
+        res.status(400).json({
+            statusCode: 400,
+            message: 'Have an error ' + e
+        })
+    }
+})
+
+router.get('/productCategory/:id', async (req, res) => {
+    try {
+        const id = parseInt(req.params.id)
+        const data = await pgDB.query(`SELECT * FROM product_categories WHERE category_id = $1`, [id])
+        res.status(200).send(data.rows);
+        // res.status(200).json({
+        //     data: data.rows,
+        //     statusCode: 200,
+        //     message: 'success'
+        // })
     } catch (e) {
         res.status(400).json({
             statusCode: 400,

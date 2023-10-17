@@ -26,18 +26,15 @@ router.post('/material', async (req, res) => {
 router.get('/material', async (req, res) => {
     try {
         const data = await pgDB.query(`select
-        a.material_id,
+        a.materials_id,
         a.material_name,
+        a.supplier_id,
         b.supplier_name,
         a.price,
-        a.quantity_in_stock from materials a
+        a.quantity_in_stock from meterials a
     inner join suppliers b
     on a.supplier_id = b.supplier_id`)
-        res.status(200).json({
-            data: data.rows,
-            statuCode: 200,
-            message: 'success'
-        })
+        res.status(200).json(data.rows);
     } catch (e) {
         res.status(400).json({
             statuCode: '400',

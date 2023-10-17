@@ -1,4 +1,5 @@
 const express = require('express')
+const cors = require("cors");
 const app = express()
 const port = 3000
 
@@ -9,6 +10,16 @@ const ProductRoute = require('./src/routes/product/Product.js')
 const MaterialProductRoute = require('./src/routes/material_product/MaterialProduct.js')
 
 app.use(express.json())
+
+app.use(
+    cors({
+        origin: "http://localhost:3001",
+        methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+        credentials: true, // If you're using cookies or sessions
+        optionsSuccessStatus: 204,
+    })
+);
+
 app.use('/api', ProductCategoryRoute)
 app.use('/api', SupplierRoute)
 app.use('/api', MaterialRoute)
