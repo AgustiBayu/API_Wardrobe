@@ -103,9 +103,13 @@ router.delete('/product/:id', async (req, res) => {
                     console.log('image e ', err)
                 }
             })
+            const tableName = 'products';
+            const columnName = 'product_id';
+            const resetQuery = `SELECT setval('${tableName}_${columnName}_seq', (SELECT COALESCE(MAX(${columnName}), 0) + 1 FROM ${tableName}), false)`;
+            await pgDB.query(resetQuery);
         } else {
             statusCode = 400,
-            message = 'failed'
+                message = 'failed'
         }
         res.status(statusCode).json({
             statusCode,

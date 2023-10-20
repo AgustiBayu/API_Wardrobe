@@ -9,6 +9,7 @@ const ProductRoute = require("./src/routes/product/Product.js");
 const MaterialProductRoute = require("./src/routes/material_product/MaterialProduct.js");
 const ProductStockRoute = require("./src/routes/product_stock/ProductStock.js");
 const CustomerRoute = require("./src/routes/customer/Customer.js");
+const OrderRoute = require('./src/routes/order/Order.js')
 
 app.use(express.json());
 app.use("/api", ProductCategoryRoute);
@@ -18,6 +19,7 @@ app.use("/api", ProductRoute);
 app.use("/api", MaterialProductRoute);
 app.use("/api", ProductStockRoute);
 app.use("/api", CustomerRoute);
+app.use("/api", OrderRoute);
 
 app.listen(port, () => {
   console.log(`app running on port http://localhost:${port}/api`);

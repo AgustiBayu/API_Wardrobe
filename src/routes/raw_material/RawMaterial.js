@@ -75,9 +75,14 @@ router.delete('/material/:id', async (req, res) => {
         const { id } = req.params
         const data = await pgDB.query(`DELETE FROM materials WHERE material_id = $1`, [id])
         statuCode = 200, message = 'success'
-        if (data.rowCount == 0) {
+        if(data.rowCount > 0) {
+            const tableName = 'materials';
+            const columnName = 'material_id';
+            const resetQuery = `SELECT setval('${tableName}_${columnName}_seq', (SELECT COALESCE(MAX(${columnName}), 0) + 1 FROM ${tableName}), false)`;
+            await pgDB.query(resetQuery);
+        } else {
             statuCode = 400,
-                message = 'failed'
+            message = 'failed'
         }
         res.status(statuCode).json({
             statuCode,

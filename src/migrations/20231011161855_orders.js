@@ -5,7 +5,6 @@
 exports.up = function(knex) {
     return knex.schema.createTable('orders', function(table){
         table.increments('order_id').primary();
-        table.string('customer_name').notNullable();
         table.date('order_date').notNullable();
         table.integer('total_amount').notNullable();
         table.integer('customer_id').unsigned();

@@ -7,7 +7,7 @@ exports.up = function(knex) {
         table.increments('material_products_id').primary();
         table.integer('material_id').unsigned();
         table.integer('product_id').unsigned();
-        table.integer('satuan').notNullable();
+        table.string('satuan').notNullable();
         table.foreign('material_id').references('material_id').inTable('materials');
         table.foreign('product_id').references('product_id').inTable('products');
     })
