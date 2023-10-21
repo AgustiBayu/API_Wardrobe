@@ -4,9 +4,8 @@
  * @type { Object.<string, import("knex").Knex.Config> }
  */
 module.exports = {
-
   development: {
-    client: 'pg',
+    client: "pg",
     connection: {
       user: 'postgres',
       password: 'jaya123123',
@@ -15,44 +14,43 @@ module.exports = {
       host: 'localhost'
     },
     migrations: {
-      tableName: 'knex_migrations',
-      directory: './src/migrations'
+      tableName: "knex_migrations",
+      directory: "./src/migrations",
     },
     seeds: {
-      directory: './src/seeders'
-    }
+      directory: "./src/seeders",
+    },
   },
 
   staging: {
-    client: 'postgresql',
+    client: "postgresql",
     connection: {
-      database: 'my_db',
-      user:     'username',
-      password: 'password'
+      database: "my_db",
+      user: "username",
+      password: "password",
     },
     pool: {
       min: 2,
-      max: 10
+      max: 10,
     },
     migrations: {
-      tableName: 'knex_migrations'
-    }
+      tableName: "knex_migrations",
+    },
   },
 
   production: {
-    client: 'postgresql',
+    client: "postgresql",
     connection: {
-      database: 'my_db',
-      user:     'username',
-      password: 'password'
+      database: "my_db",
+      user: "username",
+      password: "password",
     },
     pool: {
       min: 2,
-      max: 10
+      max: 10,
     },
     migrations: {
-      tableName: 'knex_migrations'
-    }
-  }
-
+      tableName: "knex_migrations",
+    },
+  },
 };

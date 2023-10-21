@@ -4,15 +4,17 @@ const router = express.Router()
 
 router.post('/material', async (req, res) => {
     try {
-        const { materialName, supplierId, price, quantityInStock } = req.body
-        const data = await pgDB.query(`INSERT INTO materials VALUES(DEFAULT, $1, $2, $3, $4)`, [materialName, supplierId, price, quantityInStock])
-        statuCode = 200, message = 'success'
+        const { materialsName, supId, price, quantity } = req.body;
+        console.log(materialsName);
+        const data = await pgDB.query(`INSERT INTO materials VALUES(DEFAULT, $1, $2, $3, $4)`, [materialsName, supId, price, quantity])
+        const statusCode = 200; 
+        const message = 'success';
         if (data.rowCount == 0) {
-            statuCode = 400,
-                message = 'failed'
+            statusCode = 400;
+            message = 'failed';
         }
-        res.status(statuCode).json({
-            statuCode,
+        res.status(statusCode).json({
+            statusCode,
             message
         })
     } catch (e) {
@@ -26,12 +28,12 @@ router.post('/material', async (req, res) => {
 router.get('/material', async (req, res) => {
     try {
         const data = await pgDB.query(`select
-        a.materials_id,
+        a.material_id,
         a.material_name,
         a.supplier_id,
         b.supplier_name,
         a.price,
-        a.quantity_in_stock from meterials a
+        a.quantity_in_stock from materials a
     inner join suppliers b
     on a.supplier_id = b.supplier_id`)
         res.status(200).json(data.rows);
@@ -45,11 +47,11 @@ router.get('/material', async (req, res) => {
 
 router.put('/material/:id', async (req, res) => {
     try {
-        const { materialName, supplierId, price, quantityInStock } = req.body
-        const { id } = req.params
+        const { materialName, supId, price, quantity } = req.body
+        const id = req.params.id
 
         const data = await pgDB.query(`UPDATE materials SET material_name = $1, supplier_id = $2,
-        price = $3, quantity_in_stock = $4 WHERE material_id = $5`, [materialName, supplierId, price, quantityInStock, id])
+        price = $3, quantity_in_stock = $4 WHERE material_id = $5`, [materialName, supId, price, quantity, id])
         statuCode = 200, message = 'success'
         if (data.rowCount == 0) {
             statuCode = 400,
@@ -72,9 +74,14 @@ router.delete('/material/:id', async (req, res) => {
         const { id } = req.params
         const data = await pgDB.query(`DELETE FROM materials WHERE material_id = $1`, [id])
         statuCode = 200, message = 'success'
-        if (data.rowCount == 0) {
+        if(data.rowCount > 0) {
+            const tableName = 'materials';
+            const columnName = 'material_id';
+            const resetQuery = `SELECT setval('${tableName}_${columnName}_seq', (SELECT COALESCE(MAX(${columnName}), 0) + 1 FROM ${tableName}), false)`;
+            await pgDB.query(resetQuery);
+        } else {
             statuCode = 400,
-                message = 'failed'
+            message = 'failed'
         }
         res.status(statuCode).json({
             statuCode,

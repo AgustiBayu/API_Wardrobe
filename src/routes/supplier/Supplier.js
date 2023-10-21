@@ -26,11 +26,7 @@ router.post('/supplier', async (req, res) => {
 router.get('/supplier', async (req, res) => {
     try {
         const data = await pgDB.query(`SELECT * FROM suppliers`)
-        res.status(200).json({
-            data: data.rows,
-            statusCode: 200,
-            message: 'success'
-        })
+        res.status(200).json(data.rows);
     } catch (e) {
         res.status(400).json({
             statusCode: 400,
@@ -66,15 +62,19 @@ router.delete('/supplier/:id', async (req, res) => {
         const { id } = req.params
         const data = await pgDB.query(`DELETE FROM suppliers WHERE supplier_id = $1`, [id])
         var statusCode = 200, message = 'success';
-        if (data.rowCount == 0) {
-            statusCode = 400,
-                message = 'failed'
+        if (data.rowCount > 0) {
+            const tableName = 'suppliers';
+            const columnName = 'supplier_id';
+            const resetQuery = `SELECT setval('${tableName}_${columnName}_seq', (SELECT COALESCE(MAX(${columnName}), 0) + 1 FROM ${tableName}), false)`;
+            await pgDB.query(resetQuery);
         } else {
-            res.status(statusCode).json({
-                statusCode,
-                message
-            })
+            statusCode = 400,
+            message = 'failed'
         }
+        res.status(statusCode).json({
+            statusCode,
+            message
+        })
     } catch (e) {
         res.status(400).json({
             statusCode: 400,

@@ -46,16 +46,15 @@ router.put('/productCategory/:id', async (req, res) => {
         const { id } = req.params
         const { name } = req.body
         const data = await pgDB.query(`UPDATE product_categories SET category_name = $1 WHERE category_id = $2`, [name, id])
-        var statusCode = 200, message = 'success';
+        statusCode = 200, message = 'success'
         if (data.rowCount == 0) {
             statusCode = 400,
                 message = 'failed'
-        } else {
-            res.status(statusCode).json({
-                statusCode,
-                message
-            })
-        } 
+        }
+        res.status(statusCode).json({
+            statusCode,
+            message
+        })
     } catch (e) {
         res.status(400).json({
             statusCode: 400,
@@ -68,15 +67,19 @@ router.delete('/productCategory/:id', async (req, res) => {
         const { id } = req.params
         const data = await pgDB.query(`DELETE FROM product_categories WHERE category_id = $1`, [id])
         var statusCode = 200, message = 'success';
-        if (data.rowCount == 0) {
-            statusCode = 400,
-                message = 'failed'
-        } else {
-            res.status(statusCode).json({
-                statusCode,
-                message
-            })
+        if(data.rowCount > 0) {
+            const tableName = 'product_categories';
+            const columnName = 'category_id';
+            const resetQuery = `SELECT setval('${tableName}_${columnName}_seq', (SELECT COALESCE(MAX(${columnName}), 0) + 1 FROM ${tableName}), false)`;
+            await pgDB.query(resetQuery);
+        } else{
+            statusCode = '400',
+            message = 'failed'
         }
+        res.status(statusCode).json({
+            statusCode,
+            message
+        })
     } catch (e) {
         res.status(400).json({
             statusCode: 400,

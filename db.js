@@ -1,4 +1,4 @@
-const pg = require('pg')
+const pg = require("pg");
 
 const pgDB = new pg.Pool({
     user: 'postgres',
@@ -8,4 +8,4 @@ const pgDB = new pg.Pool({
     host: 'localhost'
 })
 
-module.exports = {pgDB}
+module.exports = { pgDB };
