@@ -10,7 +10,8 @@ router.get('/materialProduct', async (req, res) => {
         c.material_name,
         c.price,
         c.quantity_in_stock,
-        a.satuan 
+        a.satuan,
+		a.jumlah
         from material_products a
     inner join products b
     on a.product_id = b.product_id
@@ -31,8 +32,8 @@ router.get('/materialProduct', async (req, res) => {
 
 router.post('/materialProduct', async (req, res) => {
     try {
-        const { materialId, productId, satuan } = req.body
-        const data = await pgDB.query(`INSERT INTO material_products VALUES(DEFAULT, $1,$2,$3)`, [materialId, productId, satuan])
+        const { materialId, productId, satuan, jumlah } = req.body
+        const data = await pgDB.query(`INSERT INTO material_products VALUES(DEFAULT, $1,$2,$3,$4)`, [materialId, productId, satuan, jumlah])
         statusCode = 200, message = 'success'
         if (data.rowCount == 0) {
             res.status(400).json({
@@ -55,10 +56,10 @@ router.post('/materialProduct', async (req, res) => {
 
 router.put('/materialProduct/:id', async (req, res) => {
     try {
-        const { materialId, productId, satuan } = req.body
+        const { materialId, productId, satuan, jumlah } = req.body
         const { id } = req.params
-        const data = await pgDB.query(`UPDATE material_products SET material_id = $1, product_id = $2, satuan = $3
-        WHERE material_products_id = $4`, [materialId, productId, satuan, id])
+        const data = await pgDB.query(`UPDATE material_products SET material_id = $1, product_id = $2, satuan = $3,
+        jumlah = $4 WHERE material_products_id = $5`, [materialId, productId, satuan, jumlah, id])
         statusCode = 200, message = 'success'
         if (data.rowCount == 0) {
             statusCode = 400,
