@@ -47,7 +47,6 @@ router.post('/imgUp', upload.single('image'), (req, res) => {
 router.post('/product', async (req, res) => {
     try {
         const { productName, categoryId, price, description, createdAt, imgProd } = req.body;
-        console.log(imgProd);
 
         const data = await pgDB.query(`INSERT INTO products VALUES(DEFAULT,$1,$2,$3,$4,$5,$6)`, [productName,
             categoryId, price, imgProd, description, createdAt])
@@ -71,12 +70,10 @@ router.post('/product', async (req, res) => {
 router.put('/product/:id', async (req, res) => {
     try {
         const { productName, categoryId, price, description, createdAt, imgProd } = req.body;
-        console.log(req.body);
         const id = parseInt(req.params.id, 10);
 
         const data = await pgDB.query(`UPDATE products SET product_name =$1, category_id=$2, price=$3, image=$4, description=$5, created_at=$6 WHERE product_id = $7`,
             [productName, categoryId, price, imgProd, description, createdAt, id]);
-        console.log(data.rowCount);
         statusCode = 200, message = 'success'
         if (data.rowCount == 0) {
             statusCode = 400;

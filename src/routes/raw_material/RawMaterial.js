@@ -5,7 +5,6 @@ const router = express.Router()
 router.post('/material', async (req, res) => {
     try {
         const { materialsName, supId, price, quantity } = req.body;
-        console.log(materialsName);
         const data = await pgDB.query(`INSERT INTO materials VALUES(DEFAULT, $1, $2, $3, $4)`, [materialsName, supId, price, quantity])
         const statusCode = 200; 
         const message = 'success';

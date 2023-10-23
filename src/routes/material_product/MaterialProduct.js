@@ -6,7 +6,9 @@ router.get('/materialProduct', async (req, res) => {
     try {
         const data = await pgDB.query(`select 
         a.material_products_id,
+        b.product_id,
         b.product_name,
+        c.material_id,
         c.material_name,
         c.price,
         c.quantity_in_stock,
@@ -17,11 +19,7 @@ router.get('/materialProduct', async (req, res) => {
     on a.product_id = b.product_id
     inner join materials c
     on a.material_id = c.material_id`)
-        res.status(200).json({
-            data: data.rows,
-            statusCode: 200,
-            message: 'success'
-        })
+        res.status(200).json(data.rows);
     } catch (e) {
         res.status(400).json({
             statusCode: 400,
@@ -32,8 +30,8 @@ router.get('/materialProduct', async (req, res) => {
 
 router.post('/materialProduct', async (req, res) => {
     try {
-        const { materialId, productId, satuan, jumlah } = req.body
-        const data = await pgDB.query(`INSERT INTO material_products VALUES(DEFAULT, $1,$2,$3,$4)`, [materialId, productId, satuan, jumlah])
+        const { materialsName, productsName, satuan, jumlah } = req.body
+        const data = await pgDB.query(`INSERT INTO material_products VALUES(DEFAULT, $1,$2,$3,$4)`, [materialsName, productsName, satuan, jumlah])
         statusCode = 200, message = 'success'
         if (data.rowCount == 0) {
             res.status(400).json({
@@ -56,10 +54,10 @@ router.post('/materialProduct', async (req, res) => {
 
 router.put('/materialProduct/:id', async (req, res) => {
     try {
-        const { materialId, productId, satuan, jumlah } = req.body
-        const { id } = req.params
+        const { materialsName, productsName, satuan, jumlah } = req.body
+        const id = req.params.id
         const data = await pgDB.query(`UPDATE material_products SET material_id = $1, product_id = $2, satuan = $3,
-        jumlah = $4 WHERE material_products_id = $5`, [materialId, productId, satuan, jumlah, id])
+        jumlah = $4 WHERE material_products_id = $5`, [materialsName, productsName, satuan, jumlah, id])
         statusCode = 200, message = 'success'
         if (data.rowCount == 0) {
             statusCode = 400,
