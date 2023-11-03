@@ -1,11 +1,15 @@
-const pg = require("pg");
+const mysql = require("mysql2/promise");
 
-const pgDB = new pg.Pool({
-  user: "postgres",
-  password: "terserah123",
-  database: "wardrobe",
-  port: "5432",
-  host: "localhost",
-});
+async function getConnection() {
 
-module.exports = { pgDB };
+  const mysqlDB = await mysql.createConnection({
+    user: "root",
+    password: "",
+    database: "wardrobe",
+    port: "3306",
+    host: "localhost",
+  });
+  return mysqlDB
+}
+
+module.exports = { getConnection };

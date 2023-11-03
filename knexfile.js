@@ -5,12 +5,12 @@
  */
 module.exports = {
   development: {
-    client: "pg",
+    client: "mysql",
     connection: {
-      user: "postgres",
-      password: "terserah123",
+      user: "root",
+      password: "",
       database: "wardrobe",
-      port: "5432",
+      port: "3306",
       host: "localhost",
     },
     migrations: {
@@ -23,7 +23,7 @@ module.exports = {
   },
 
   staging: {
-    client: "postgresql",
+    client: "mysql",
     connection: {
       database: "my_db",
       user: "username",
@@ -39,7 +39,7 @@ module.exports = {
   },
 
   production: {
-    client: "postgresql",
+    client: "mysql",
     connection: {
       database: "my_db",
       user: "username",

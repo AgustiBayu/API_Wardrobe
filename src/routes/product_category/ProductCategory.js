@@ -1,11 +1,12 @@
 const express = require('express')
-const { pgDB } = require('../../../db.js')
+const { mysqlDB, getConnection } = require('../../../db.js')
 const router = express.Router()
 
 router.post('/productCategory', async (req, res) => {
+    const conn = await getConnection()
     try {
         const { name } = req.body
-        const data = await pgDB.query(`INSERT INTO product_categories VALUES (DEFAULT, $1)`, [name])
+        const data = await conn.execute(`INSERT INTO product_categories VALUES (DEFAULT, ?)`, [name])
         var statusCode = 200, message = 'success';
         if (data.rowCount == 0) {
             statusCode = 400,
@@ -25,8 +26,9 @@ router.post('/productCategory', async (req, res) => {
 })
 
 router.get('/productCategory', async (req, res) => {
+    const conn = await getConnection()
     try {
-        const data = await pgDB.query(`SELECT * FROM product_categories`)
+        const data = await conn.execute(`SELECT * FROM product_categories`)
         res.status(200).json({
             data: data.rows,
             statusCode: 200,
@@ -41,10 +43,11 @@ router.get('/productCategory', async (req, res) => {
 })
 
 router.put('/productCategory/:id', async (req, res) => {
+    const conn = await getConnection()
     try {
         const { id } = req.params
         const { name } = req.body
-        const data = await pgDB.query(`UPDATE product_categories SET category_name = $1 WHERE category_id = $2`, [name, id])
+        const data = await conn.execute(`UPDATE product_categories SET category_name = ? WHERE category_id = ?`, [name, id])
         statusCode = 200, message = 'success'
         if (data.rowCount == 0) {
             statusCode = 400,
@@ -62,15 +65,16 @@ router.put('/productCategory/:id', async (req, res) => {
     }
 })
 router.delete('/productCategory/:id', async (req, res) => {
+    const conn = await getConnection()
     try {
         const { id } = req.params
-        const data = await pgDB.query(`DELETE FROM product_categories WHERE category_id = $1`, [id])
+        const data = await conn.execute(`DELETE FROM product_categories WHERE category_id = ?`, [id])
         var statusCode = 200, message = 'success';
         if(data.rowCount > 0) {
             const tableName = 'product_categories';
             const columnName = 'category_id';
             const resetQuery = `SELECT setval('${tableName}_${columnName}_seq', (SELECT COALESCE(MAX(${columnName}), 0) + 1 FROM ${tableName}), false)`;
-            await pgDB.query(resetQuery);
+            await mysqlDB.query(resetQuery);
         } else{
             statusCode = '400',
             message = 'failed'

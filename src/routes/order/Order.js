@@ -1,13 +1,14 @@
 const express = require('express')
-const { pgDB } = require('../../../db.js')
+const { mysqlDB, getConnection } = require('../../../db.js')
 
 const router = express.Router();
 
 router.post('/order', async (req, res) => {
+    const conn = await getConnection()
     try {
         const { orderDate, totalAmount, customerId } = req.body
         statusCode = 200, message = 'success'
-        const data = await pgDB.query(`INSERT INTO orders VALUES(DEFAULT, $1, $2, $3)`, [orderDate, totalAmount, customerId])
+        const data = await conn.execute(`INSERT INTO orders VALUES(DEFAULT, ?,?,?)`, [orderDate, totalAmount, customerId])
         statusCode = 200, message = 'success'
         if (data.rowCount == 0) {
             statusCode = 400,
@@ -26,8 +27,9 @@ router.post('/order', async (req, res) => {
 })
 
 router.get('/order', async (req, res) => {
+    const conn = await getConnection()
     try {
-        const data = await pgDB.query(`SELECT 
+        const data = await conn.execute(`SELECT 
         a.order_id,
         b.customer_name,
         a.total_amount,
@@ -50,11 +52,12 @@ router.get('/order', async (req, res) => {
 })
 
 router.put('/order/:id', async (req, res)=> {
+    const conn = await getConnection()
     try {
         const {id} = req.params
         const {orderDate, totalAmount, customerId} = req.body
-        const data = await pgDB.query(`UPDATE orders SET order_date = $1, total_amount = $2, customer_id = $3
-        WHERE order_id = $4`, [orderDate, totalAmount, customerId, id])
+        const data = await conn.execute(`UPDATE orders SET order_date = ?, total_amount = ?, customer_id = ?
+        WHERE order_id = ?`, [orderDate, totalAmount, customerId, id])
 
         statusCode = 200, message = 'success'
         if (data.rowCount == 0) {
@@ -74,15 +77,16 @@ router.put('/order/:id', async (req, res)=> {
     }
 })
 router.delete('/order/:id', async (req, res) => {
+    const conn = await getConnection()
     try {
         const {id} = req.params
-        const data = await pgDB.query(`DELETE FROM orders WHERE order_id = $1`, [id])
+        const data = await conn.execute(`DELETE FROM orders WHERE order_id = ?`, [id])
         statusCode = 200, message = 'success'
         if(data.rowCount > 0) {
             const tableName = 'orders'
             const columnName = 'order_id'
             const resetQuery = `SELECT setval('${tableName}_${columnName}_seq', (SELECT COALESCE(MAX(${columnName}), 0) + 1 FROM ${tableName}), FALSE)`
-            await pgDB.query(resetQuery)
+            await mysqlDB.query(resetQuery)
         } else {
             statusCode = 400,
             message = 'failed'

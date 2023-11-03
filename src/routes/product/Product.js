@@ -1,5 +1,5 @@
 const express = require('express')
-const { pgDB } = require('../../../db.js')
+const { mysqlDB, getConnection } = require('../../../db.js')
 const fs = require('fs');
 const multer = require('multer');
 const path = require('path');
@@ -16,8 +16,9 @@ const storage = multer.diskStorage({
 const upload = multer({ storage })
 
 router.get('/product', async (req, res) => {
+    const conn = await getConnection()
     try {
-        const data = await pgDB.query(`
+        const data = await conn.execute(`
         SELECT 
             a.product_id,
             a.product_name,
@@ -42,12 +43,12 @@ router.get('/product', async (req, res) => {
 })
 
 router.post('/product', upload.single('image'), async (req, res) => {
+    const conn = await getConnection()
     try {
-
         const imagePath = req.file ? req.file.filename : '';
         const { productName, categoryId, price, description, createdAt } = req.body
 
-        const data = await pgDB.query(`INSERT INTO products VALUES(DEFAULT,$1,$2,$3,$4,$5,$6)`, [productName,
+        const data = await conn.execute(`INSERT INTO products VALUES(DEFAULT,?,?,?,?,?,?)`, [productName,
             categoryId, price, imagePath, description, createdAt])
         statusCode = 200, message = 'success'
         if (data.rowCount == 0) {
@@ -67,12 +68,13 @@ router.post('/product', upload.single('image'), async (req, res) => {
 })
 
 router.put('/product/:id', upload.single('image'), async (req, res) => {
+    const conn = await getConnection()
     try {
         const { productName, categoryId, price, description, createdAt } = req.body
         const imagePath = req.file ? req.file.filename : '';
         const { id } = req.params
 
-        const data = await pgDB.query(`UPDATE products SET product_name =$1, category_id=$2, price=$3,image=$4, description=$5, created_at=$6 WHERE product_id = $7`,
+        const data = await conn.execute(`UPDATE products SET product_name =?, category_id=?, price=?,image=?, description=?, created_at=? WHERE product_id = ?`,
             [productName, categoryId, price, imagePath, description, createdAt, id])
         statusCode = 200, message = 'success'
         if (data.rowCount == 0) {
@@ -92,10 +94,11 @@ router.put('/product/:id', upload.single('image'), async (req, res) => {
 })
 
 router.delete('/product/:id', async (req, res) => {
+    const conn = await getConnection()
     try {
         const { id } = req.params
-        const dataImage = await pgDB.query(`SELECT image from products WHERE product_id = $1`, [id])
-        const data = await pgDB.query(`DELETE FROM products WHERE product_id = $1`, [id])
+        const dataImage = await conn.execute(`SELECT image from products WHERE product_id = ?`, [id])
+        const data = await mysqlDB.query(`DELETE FROM products WHERE product_id = ?`, [id])
         var statusCode = 200, message = 'success';
         if (data.rowCount > 0) {
             fs.unlink('./uploads/' + dataImage.rows[0].image, (err) => {
@@ -106,7 +109,7 @@ router.delete('/product/:id', async (req, res) => {
             const tableName = 'products';
             const columnName = 'product_id';
             const resetQuery = `SELECT setval('${tableName}_${columnName}_seq', (SELECT COALESCE(MAX(${columnName}), 0) + 1 FROM ${tableName}), false)`;
-            await pgDB.query(resetQuery);
+            await mysqlDB.query(resetQuery);
         } else {
             statusCode = 400,
                 message = 'failed'
