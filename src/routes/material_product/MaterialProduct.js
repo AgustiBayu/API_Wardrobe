@@ -89,7 +89,7 @@ router.delete('/materialProduct/:id', async (req, res) => {
             const tableName = 'material_products'
             const columnName = 'material_products_id'
             const resetQuery = `SELECT setval('${tableName}_${columnName}_seq', (SELECT COALESCE(MAX(${columnName}), 0) + 1 FROM ${tableName}), FALSE)`
-            await mysqlDB.query(resetQuery)
+            await conn.execute(resetQuery)
         } else {
             statusCode = 400,
                 message = 'failed'

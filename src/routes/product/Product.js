@@ -98,7 +98,7 @@ router.delete('/product/:id', async (req, res) => {
     try {
         const { id } = req.params
         const dataImage = await conn.execute(`SELECT image from products WHERE product_id = ?`, [id])
-        const data = await mysqlDB.query(`DELETE FROM products WHERE product_id = ?`, [id])
+        const data = await conn.execute(`DELETE FROM products WHERE product_id = ?`, [id])
         var statusCode = 200, message = 'success';
         if (data.rowCount > 0) {
             fs.unlink('./uploads/' + dataImage.rows[0].image, (err) => {
@@ -109,7 +109,7 @@ router.delete('/product/:id', async (req, res) => {
             const tableName = 'products';
             const columnName = 'product_id';
             const resetQuery = `SELECT setval('${tableName}_${columnName}_seq', (SELECT COALESCE(MAX(${columnName}), 0) + 1 FROM ${tableName}), false)`;
-            await mysqlDB.query(resetQuery);
+            await conn.execute(resetQuery);
         } else {
             statusCode = 400,
                 message = 'failed'

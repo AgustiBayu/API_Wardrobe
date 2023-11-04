@@ -77,13 +77,13 @@ router.delete('/customer/:id', async (req, res) => {
     const conn = await getConnection()
     try {
         const { id } = req.params
-        const data = await mysqlDB.query(`DELETE FROM customers WHERE customer_id = ?`, [id])
+        const data = await conn.execute(`DELETE FROM customers WHERE customer_id = ?`, [id])
         statusCode = 200, message = 'susccess';
         if (data.rowCount > 0) {
             const tableName = 'customers'
             const columnName = 'customer_id'
             const resetQuery = `SELECT setval('${tableName}_${columnName}_seq', (SELECT COALESCE(MAX(${columnName}), 0) + 1 FROM ${tableName}), false)`
-            await mysqlDB.query(resetQuery)
+            await conn.execute(resetQuery)
         } else {
             statusCode = 400,
                 message = 'failed'

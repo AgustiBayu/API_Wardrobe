@@ -74,7 +74,7 @@ router.delete('/productCategory/:id', async (req, res) => {
             const tableName = 'product_categories';
             const columnName = 'category_id';
             const resetQuery = `SELECT setval('${tableName}_${columnName}_seq', (SELECT COALESCE(MAX(${columnName}), 0) + 1 FROM ${tableName}), false)`;
-            await mysqlDB.query(resetQuery);
+            await conn.execute(resetQuery);
         } else{
             statusCode = '400',
             message = 'failed'
