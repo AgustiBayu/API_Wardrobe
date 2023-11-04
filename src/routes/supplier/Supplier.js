@@ -1,11 +1,12 @@
 const express = require('express')
-const { pgDB } = require('../../../db.js')
+const { mysqlDB, getConnection} = require('../../../db.js')
 const router = express.Router()
 
 router.post('/supplier', async (req, res) => {
     try {
+        const conn = await getConnection()
         const { supplierName, supplierContact, email, phoneNumber } = req.body
-        const data = await pgDB.query(`INSERT INTO suppliers VALUES(DEFAULT, $1,$2,$3,$4)`, [supplierName, supplierContact, email, phoneNumber])
+        const data = await conn.execute(`INSERT INTO suppliers VALUES(DEFAULT, ?, ?, ?, ?)`, [supplierName, supplierContact, email, phoneNumber])
         statusCode = 200, message = 'success'
         if (data.rowCount == 0) {
             statusCode = 400,
@@ -25,8 +26,9 @@ router.post('/supplier', async (req, res) => {
 
 router.get('/supplier', async (req, res) => {
     try {
-        const data = await pgDB.query(`SELECT * FROM suppliers`)
-        res.status(200).json(data.rows);
+        const conn = await getConnection()
+        const data = await conn.execute(`SELECT * FROM suppliers`)
+        res.status(200).json(data[0]);
     } catch (e) {
         res.status(400).json({
             statusCode: 400,
@@ -37,10 +39,11 @@ router.get('/supplier', async (req, res) => {
 
 router.put('/supplier/:id', async (req, res) => {
     try {
+        const conn = await getConnection()
         const { supplierName, supplierContact, email, phoneNumber } = req.body
         const { id } = req.params
-        const data = await pgDB.query(`UPDATE suppliers SET supplier_name = $1, contact_name = $2,
-        email = $3, phone_number = $4 WHERE supplier_id = $5`, [supplierName, supplierContact, email, phoneNumber, id])
+        const data = await conn.execute(`UPDATE suppliers SET supplier_name = ?, contact_name = ?,
+        email = ?, phone_number = ? WHERE supplier_id = ?`, [supplierName, supplierContact, email, phoneNumber, id])
         statusCode = 200, message = 'success'
         if (data.rowCount == 0) {
             statusCode = 400,
@@ -59,14 +62,15 @@ router.put('/supplier/:id', async (req, res) => {
 })
 router.delete('/supplier/:id', async (req, res) => {
     try {
+        const conn = await getConnection()
         const { id } = req.params
-        const data = await pgDB.query(`DELETE FROM suppliers WHERE supplier_id = $1`, [id])
+        const data = await conn.execute(`DELETE FROM suppliers WHERE supplier_id = ?`, [id])
         var statusCode = 200, message = 'success';
         if (data.rowCount > 0) {
             const tableName = 'suppliers';
             const columnName = 'supplier_id';
             const resetQuery = `SELECT setval('${tableName}_${columnName}_seq', (SELECT COALESCE(MAX(${columnName}), 0) + 1 FROM ${tableName}), false)`;
-            await pgDB.query(resetQuery);
+            await conn.execute(resetQuery);
         } else {
             statusCode = 400,
             message = 'failed'

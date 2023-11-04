@@ -1,11 +1,12 @@
 const express = require('express')
-const {pgDB} = require('../../../db.js')
+const {mysqlDB, getConnection} = require('../../../db.js')
 const router = express.Router()
 
 router.post('/orderDetail', async(req, res)=> {
+    const conn = await getConnection()
     try {
         const {orderId, productId, quantity, unitPrice} = req.body
-        const data = await pgDB.query(`INSERT INTO order_details VALUES(DEFAULT, $1, $2, $3, $4)`, [orderId, productId, quantity, unitPrice])
+        const data = await conn.execute(`INSERT INTO order_details VALUES(DEFAULT, ?,?,?,?)`, [orderId, productId, quantity, unitPrice])
         statusCode = 200, message = 'success'
         if(data.rowCount == 0) {
             statusCode = 400,

@@ -1,11 +1,12 @@
 const express = require('express')
-const {pgDB} = require('../../../db.js')
+const {mysqlDB, getConnection} = require('../../../db.js')
 const router = express.Router()
 
 router.post('/productStock', async(req, res)=>{
     try {
+        const conn = await getConnection()
         const {productId, size, color, stockQuantity} = req.body
-        const data = await pgDB.query(`INSERT INTO product_stocks VALUES(DEFAULT, $1, $2, $3, $4)`, [productId, size, color, stockQuantity])
+        const data = await conn.execute(`INSERT INTO product_stocks VALUES(DEFAULT, ?, ?, ?, ?)`, [productId, size, color, stockQuantity])
         statusCode = 200, message = 'success'
         if(data.rowCount == 0) {
             statusCode = 400,
@@ -25,10 +26,11 @@ router.post('/productStock', async(req, res)=>{
 })
 router.get('/productStock', async(req, res)=>{
     try {
-        const data = await pgDB.query(``)
+        const conn = await getConnection()
+        const data = await conn.execute(`SELECT * FROM product_stocks`)
         statusCode = 200, message = 'success'
             res.status(statusCode).json({
-                data: data.rows,
+                data: data[0],
                 statusCode: '200',
                 message
             })
