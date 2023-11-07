@@ -19,13 +19,13 @@ router.get('/materialProduct', async (req, res) => {
     inner join materials c
     on a.material_id = c.material_id`)
         res.status(200).json({
-            data: data.rows,
+            data: data[0],
             statusCode: 200,
             message: 'success'
         })
     } catch (e) {
-        res.status(400).json({
-            statusCode: 400,
+        res.status(500).json({
+            statusCode: 500,
             message: 'Have an error: ' + e
         })
     }
@@ -37,9 +37,9 @@ router.post('/materialProduct', async (req, res) => {
         const { materialId, productId, satuan, jumlah } = req.body
         const data = await conn.execute(`INSERT INTO material_products VALUES(DEFAULT, ?,?,?,?)`, [materialId, productId, satuan, jumlah])
         statusCode = 200, message = 'success'
-        if (data.rowCount == 0) {
-            res.status(400).json({
-                statusCode: 400,
+        if (data[0].affectedRows == 0) {
+            res.status(500).json({
+                statusCode: 500,
                 message: 'failed'
             })
         } else {
@@ -49,8 +49,8 @@ router.post('/materialProduct', async (req, res) => {
             })
         }
     } catch (e) {
-        res.status(400).json({
-            statusCode: 400,
+        res.status(500).json({
+            statusCode: 500,
             message: 'Have an error :' + e
         })
     }
@@ -64,7 +64,7 @@ router.put('/materialProduct/:id', async (req, res) => {
         const data = await conn.execute(`UPDATE material_products SET material_id = ?, product_id = ?, satuan = ?,
         jumlah = ? WHERE material_products_id = ?`, [materialId, productId, satuan, jumlah, id])
         statusCode = 200, message = 'success'
-        if (data.rowCount == 0) {
+        if (data[0].affectedRows == 0) {
             statusCode = 400,
                 message = 'failed'
         }
@@ -73,8 +73,8 @@ router.put('/materialProduct/:id', async (req, res) => {
             message
         })
     } catch (e) {
-        res.status(400).json({
-            statusCode: 400,
+        res.status(500).json({
+            statusCode: 500,
             message: 'Have an error ' + e
         })
     }
@@ -85,22 +85,26 @@ router.delete('/materialProduct/:id', async (req, res) => {
         const { id } = req.params
         const data = await conn.execute(`DELETE FROM material_products WHERE material_products_id = ?`, [id])
         statusCode = 200, message = 'success'
-        if (data.rowCount > 0) {
+        if (data[0].affectedRows > 0) {
             const tableName = 'material_products'
             const columnName = 'material_products_id'
-            const resetQuery = `SELECT setval('${tableName}_${columnName}_seq', (SELECT COALESCE(MAX(${columnName}), 0) + 1 FROM ${tableName}), FALSE)`
-            await conn.execute(resetQuery)
+            const maxIdQuery = `SELECT COALESCE(MAX(${columnName}), 0) + 1 AS max_id FROM ${tableName}`;
+            const [maxIdData] = await conn.execute(maxIdQuery);
+            const maxId = maxIdData[0].max_id;
+            
+            const resetQuery = `ALTER TABLE ${tableName} AUTO_INCREMENT = ${maxId}`;
+            await conn.execute(resetQuery);
         } else {
-            statusCode = 400,
-                message = 'failed'
+            statusCode = 400;
+            message = 'failed';
         }
         res.status(statusCode).json({
             statusCode,
             message
         })
     } catch (e) {
-        res.status(400).json({
-            statusCode: 400,
+        res.status(500).json({
+            statusCode: 500,
             message: 'Have an error :' + e
         })
     }
@@ -123,13 +127,13 @@ router.get('/materialProductBOM', async (req, res) => {
     on a.material_id = c.material_id
 		GROUP BY b.product_name, c.material_name, b.price,c.quantity_in_stock, c.price`)
         res.status(200).json({
-            data: data.rows,
+            data: data[0],
             statusCode: 200,
             message: 'success'
         })
     } catch (e) {
-        res.status(400).json({
-            statusCode: 400,
+        res.status(500).json({
+            statusCode: 500,
             message: 'Have an error: ' + e
         })
     }

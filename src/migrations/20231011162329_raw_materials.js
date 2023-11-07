@@ -8,7 +8,7 @@ exports.up = function(knex) {
         table.string('material_name').notNullable();
         table.integer('supplier_id').unsigned();
         table.integer('price').notNullable();
-        table.integer('quantity_in_stock').notNullable();
+        table.integer('quantity_in_stock').notNullable().defaultTo(0);
         table.foreign('supplier_id').references('supplier_id').inTable('suppliers')
     })
 };
@@ -18,5 +18,5 @@ exports.up = function(knex) {
  * @returns { Promise<void> }
  */
 exports.down = function(knex) {
-  
+    return knex.schema.dropTable('materials')
 };

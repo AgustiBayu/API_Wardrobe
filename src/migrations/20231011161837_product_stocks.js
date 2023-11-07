@@ -6,9 +6,9 @@ exports.up = function(knex) {
     return knex.schema.createTable('product_stocks', function(table){
         table.increments('stock_id').primary();
         table.integer('product_id').unsigned();
-        table.integer('size').notNullable();
+        table.string('size').notNullable();
         table.string('color').notNullable();
-        table.integer('stock_quantity').notNullable();
+        table.integer('stock_quantity').notNullable().defaultTo(0);
         table.foreign('product_id').references('product_id').inTable('products');
     })
 };

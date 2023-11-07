@@ -8,7 +8,7 @@ router.post('/productStock', async(req, res)=>{
         const {productId, size, color, stockQuantity} = req.body
         const data = await conn.execute(`INSERT INTO product_stocks VALUES(DEFAULT, ?,?,?,?)`, [productId, size, color, stockQuantity])
         statusCode = 200, message = 'success'
-        if(data.rowCount == 0) {
+        if(data[0].affectedRows == 0) {
             statusCode = 400,
             message = 'failed'
         } else {
@@ -30,7 +30,7 @@ router.get('/productStock', async(req, res)=>{
         const data = await conn.execute(`SELECT * FROM product_stocks`)
         statusCode = 200, message = 'success'
             res.status(statusCode).json({
-                data: data.rows,
+                data: data[0],
                 statusCode: '200',
                 message
             })

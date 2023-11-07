@@ -8,7 +8,7 @@ exports.up = function(knex) {
         table.string('supplier_name').notNullable();
         table.string('contact_name').notNullable();
         table.string('email').notNullable();
-        table.string('phone_number').notNullable
+        table.string('phone_number').notNullable();
     })
 };
 
