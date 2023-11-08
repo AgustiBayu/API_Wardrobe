@@ -25,7 +25,7 @@ router.get('/product', async (req, res) => {
             b.category_name,
             a.image,
             a.description,
-						IFNULL(
+			IFNULL(
             (SELECT SUM(c.stock_quantity) FROM product_stocks c WHERE c.product_id = a.product_id),0) asstock_product,
             a.created_at
             from products a
