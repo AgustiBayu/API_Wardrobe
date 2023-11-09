@@ -3,10 +3,9 @@ const { mysqlDB, getConnection } = require('../../../db.js')
 const router = express.Router();
 
 router.get('/ordermo', async (req, res) => {
-    const conn = await getConnection()
     try {
-        const data = await conn.execute(`
-        SELECT c.category_name, b.product_name , a.quantity, a.total , a.status ,a.tanggal FROM order_mo a
+        const conn = await getConnection()
+        const data = await conn.execute(`SELECT c.category_name, b.product_name , a.quantity, a.total , a.status ,a.tanggal FROM order_mo a
         INNER JOIN products b
         ON a.product_id = b.product_id
         INNER JOIN product_categories c
@@ -17,7 +16,7 @@ router.get('/ordermo', async (req, res) => {
             message: 'success'
         })
     } catch (e) {
-        res.status(500).json({
+        res.status(500).json({ 
             statusCode: 500,
             message: 'Have an error :' + e
         })

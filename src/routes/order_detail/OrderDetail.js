@@ -24,29 +24,4 @@ router.post('/orderDetail', async(req, res)=> {
     }
 })
 
-router.get('/orderMO', async (req, res) =>{
-    const conn = await getConnection()
-    try {
-        const data = await conn.execute(`SELECT
-        a.product_id,
-        b.product_name,
-        a.quantity,
-        a.unit_price,
-        a.status,
-        b.created_at as tanggal FROM order_details a
-    INNER JOIN products b
-    ON a.product_id = b.product_id`)
-    res.status(200).json({
-        data: data[0],
-        statusCode: 200,
-        message: 'success'
-    })
-    } catch(e) {
-        res.status(500).json({
-            statusCode: 500,
-            message: 'Have an error :' + e
-        })
-    }
-})
-
 module.exports = router
