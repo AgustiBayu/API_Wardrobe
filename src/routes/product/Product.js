@@ -27,7 +27,8 @@ router.get('/product', async (req, res) => {
             a.price,
             a.image,
             a.description,
-            a.created_at
+            a.created_at,
+            a.product_stock
             from products a
         LEFT JOIN product_categories b 
         on a.category_id = b.category_id`)
@@ -50,7 +51,7 @@ router.post('/product', async (req, res) => {
         const conn = await getConnection()
         const { productName, categoryId, price, description, createdAt, imgProd } = req.body;
 
-        const data = await conn.execute(`INSERT INTO products VALUES(DEFAULT,?,?,?,?,?,?)`, [productName,
+        const data = await conn.execute(`INSERT INTO products VALUES(DEFAULT,?,?,?,?,?,?,DEFAULT)`, [productName,
             categoryId, price, imgProd, description, createdAt])
         statusCode = 200, message = 'success'
         if (data[0] == 0) {
@@ -72,11 +73,11 @@ router.post('/product', async (req, res) => {
 router.put('/product/:id', async (req, res) => {
     try {
         const conn = await getConnection()
-        const { productName, categoryId, price, description, createdAt, imgProd } = req.body;
+        const { productName, categoryId, price, description, createdAt, imgProd, prodStock } = req.body;
         const id = parseInt(req.params.id, 10);
-
-        const data = await conn.execute(`UPDATE products SET product_name =?, category_id=?, price=?,image=?, description=?, created_at=? WHERE product_id = ?`,
-            [productName, categoryId, price, imgProd, description, createdAt, id]);
+        
+        const data = await conn.execute(`UPDATE products SET product_name =?, category_id=?, price=?,image=?, description=?, created_at=?, product_Stock=? WHERE product_id = ?`,
+            [productName, categoryId, price, imgProd, description, createdAt, prodStock, id]);
         statusCode = 200, message = 'success'
         if (data[0] == 0) {
             statusCode = 400;
@@ -97,24 +98,25 @@ router.put('/product/:id', async (req, res) => {
 router.delete('/product/:id', async (req, res) => {
     try {
         const conn = await getConnection()
-        const { id } = req.params
+        const id = parseInt(req.params.id, 10);
         const dataImage = await conn.execute(`SELECT image from products WHERE product_id = ?`, [id])
         const data = await conn.execute(`DELETE FROM products WHERE product_id = ?`, [id])
         var statusCode = 200, message = 'success';
-        if (data[0] > 0) {
-            fs.unlink('./uploads/' + dataImage[0].image, (err) => {
-                if (err) {
-                    console.log('image e ', err)
-                }
-            })
-            const tableName = 'products';
-            const columnName = 'product_id';
-            const resetQuery = `SELECT setval('${tableName}_${columnName}_seq', (SELECT COALESCE(MAX(${columnName}), 0) + 1 FROM ${tableName}), false)`;
-            await conn.execute(resetQuery);
-        } else {
-            statusCode = 400,
-                message = 'failed'
-        }
+        // if (data[0] > 0) {
+        //     fs.unlink('./uploads/' + dataImage[0][0].image, (err) => {
+        //         if (err) {
+        //             console.log('image e ', err)
+        //         }
+        //     })
+        //     const tableName = 'products';
+        //     const columnName = 'product_id';
+        //     const resetQuery = `SELECT setval('${tableName}_${columnName}_seq', (SELECT COALESCE(MAX(${columnName}), 0) + 1 FROM ${tableName}), false)`;
+        //     await conn.execute(resetQuery);
+        // } else {
+        //     statusCode = 400,
+        //         message = 'failed'
+        //     console.log(data[0].affectedRows);
+        // }
         res.status(statusCode).json({
             statusCode,
             message

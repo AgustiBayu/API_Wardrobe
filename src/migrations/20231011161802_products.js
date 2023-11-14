@@ -12,6 +12,7 @@ exports.up = function(knex) {
         table.string('description').notNullable();
         table.date('created_at ').notNullable();
         table.foreign('category_id').references('category_id').inTable('product_categories');
+        table.integer('product_stock').nullable().defaultTo(0);
     })
 };
 

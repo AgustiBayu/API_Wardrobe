@@ -58,7 +58,7 @@ router.put('/materialProduct/:id', async (req, res) => {
     const conn = await getConnection()
     try {
         const { materialId, productId, satuan, jumlah } = req.body
-        const { id } = req.params
+        const id = req.params.id
         const data = await conn.execute(`UPDATE material_products SET material_id = ?, product_id = ?, satuan = ?,
         jumlah = ? WHERE material_products_id = ?`, [materialId, productId, satuan, jumlah, id])
         statusCode = 200, message = 'success'
@@ -83,15 +83,15 @@ router.delete('/materialProduct/:id', async (req, res) => {
         const { id } = req.params
         const data = await conn.execute(`DELETE FROM material_products WHERE material_products_id = ?`, [id])
         statusCode = 200, message = 'success'
-        if (data.rowCount > 0) {
-            const tableName = 'material_products'
-            const columnName = 'material_products_id'
-            const resetQuery = `SELECT setval('${tableName}_${columnName}_seq', (SELECT COALESCE(MAX(${columnName}), 0) + 1 FROM ${tableName}), FALSE)`
-            await mysqlDB.query(resetQuery)
-        } else {
-            statusCode = 400,
-                message = 'failed'
-        }
+        // if (data.rowCount > 0) {
+        //     const tableName = 'material_products'
+        //     const columnName = 'material_products_id'
+        //     const resetQuery = `SELECT setval('${tableName}_${columnName}_seq', (SELECT COALESCE(MAX(${columnName}), 0) + 1 FROM ${tableName}), FALSE)`
+        //     await mysqlDB.query(resetQuery)
+        // } else {
+        //     statusCode = 400,
+        //         message = 'failed'
+        // }
         res.status(statusCode).json({
             statusCode,
             message
