@@ -17,6 +17,6 @@ exports.up = function(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
+return knex.schema.dropTable('product_stocks')
 exports.down = function(knex) {
-    return knex.schema.dropTable('product_stocks')
 };

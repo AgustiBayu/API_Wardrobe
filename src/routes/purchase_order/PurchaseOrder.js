@@ -2,11 +2,13 @@ const express = require('express')
 const { mysqlDB, getConnection} = require('../../../db.js')
 const router = express.Router()
 
-router.post('/supplier', async (req, res) => {
+router.post('/purchesOrder', async (req, res) => {
     const conn = await getConnection()
     try {
-        const { supplierName, supplierContact, email, phoneNumber } = req.body
-        const data = await conn.execute(`INSERT INTO suppliers VALUES(DEFAULT, ?,?,?,?)`, [supplierName, supplierContact, email, phoneNumber])
+        const { supplierId, materialId, quantityDemand, quantityReceive,
+        total, tanggal, orderStatus, paymentStatus } = req.body
+        const data = await conn.execute(`INSERT INTO purchase_orders VALUES(DEFAULT, ?,?,?,?,?,?,?,?)`,
+        [supplierId, materialId, quantityDemand, quantityReceive, total, tanggal, orderStatus, paymentStatus])
         statusCode = 200, message = 'success'
         if (data[0].affectedRows == 0) {
             statusCode = 400,
@@ -24,10 +26,10 @@ router.post('/supplier', async (req, res) => {
     }
 })
 
-router.get('/supplier', async (req, res) => {
+router.get('/purchesOrder', async (req, res) => {
     const conn = await getConnection()
     try {
-        const data = await conn.execute(`SELECT * FROM suppliers`)
+        const data = await conn.execute(`SELECT * FROM purchase_orders`)
         res.status(200).json({
             data: data[0],
             statusCode: 200,
@@ -41,13 +43,16 @@ router.get('/supplier', async (req, res) => {
     }
 })
 
-router.put('/supplier/:id', async (req, res) => {
+router.put('/purchesOrder/:id', async (req, res) => {
     const conn = await getConnection()
     try {
-        const { supplierName, supplierContact, email, phoneNumber } = req.body
+        const { supplierId, materialId, quantityDemand, quantityReceive,
+            total, tanggal, orderStatus, paymentStatus } = req.body
         const { id } = req.params
-        const data = await conn.execute(`UPDATE suppliers SET supplier_name = ?, contact_name = ?,
-        email = ?, phone_number = ? WHERE supplier_id = ?`, [supplierName, supplierContact, email, phoneNumber, id])
+        const data = await conn.execute(`UPDATE purchase_orders SET supplier_id = ?, material_id = ?,
+        quantity_demand = ?, quantity_receive = ?, total = ?, tanggal = ?, order_status = ?,
+        payment_status = ? WHERE orderPO_id = ?`, [supplierId, materialId, quantityDemand, quantityReceive,
+            total, tanggal, orderStatus, paymentStatus, id])
         statusCode = 200, message = 'success'
         if (data.rowCount == 0) {
             statusCode = 400,
@@ -64,15 +69,15 @@ router.put('/supplier/:id', async (req, res) => {
         })
     }
 })
-router.delete('/supplier/:id', async (req, res) => {
+router.delete('/purchesOrder/:id', async (req, res) => {
     const conn = await getConnection()
     try {
         const {id} = req.params
-        const data = await conn.execute(`DELETE FROM suppliers WHERE supplier_id = ?`, [id])
+        const data = await conn.execute(`DELETE FROM purchase_orders WHERE orderPO_id = ?`, [id])
         statusCode = 200, message = 'success'
         if(data[0].affectedRows > 0) {
-            const tableName = 'suppliers'
-            const columnName = 'supplier_id'
+            const tableName = 'purchase_orders'
+            const columnName = 'orderPO_id'
             const maxIdQuery = `SELECT COALESCE(MAX(${columnName}), 0) + 1 AS max_id FROM ${tableName}`;
             const [maxIdData] = await conn.execute(maxIdQuery);
             const maxId = maxIdData[0].max_id;
