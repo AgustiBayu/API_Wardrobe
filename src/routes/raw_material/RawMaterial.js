@@ -36,7 +36,8 @@ router.get('/material', async (req, res) => {
         a.price,
         a.quantity_in_stock from materials a
     inner join suppliers b
-    on a.supplier_id = b.supplier_id`)
+    on a.supplier_id = b.supplier_id
+    order by a.material_id`)
         res.status(200).json(data[0]);
     } catch (e) {
         res.status(400).json({
@@ -77,15 +78,19 @@ router.delete('/material/:id', async (req, res) => {
         const { id } = req.params
         const data = await conn.execute(`DELETE FROM materials WHERE material_id = ?`, [id])
         statuCode = 200, message = 'success'
-        // if(data.rowCount > 0) {
-        //     const tableName = 'materials';
-        //     const columnName = 'material_id';
-        //     const resetQuery = `SELECT setval('${tableName}_${columnName}_seq', (SELECT COALESCE(MAX(${columnName}), 0) + 1 FROM ${tableName}), false)`;
-        //     await conn.execute(resetQuery);
-        // } else {
-        //     statuCode = 400,
-        //     message = 'failed'
-        // }
+        if(data[0].affectedRows > 0) {
+            const tableName = 'materials';
+            const columnName = 'material_id';
+            const maxIdQuery = `SELECT COALESCE(MAX(${columnName}), 0) + 1 AS max_id FROM ${tableName}`;
+            const [maxIdData] = await conn.execute(maxIdQuery);
+            const maxId = maxIdData[0].max_id;
+            
+            const resetQuery = `ALTER TABLE ${tableName} AUTO_INCREMENT = ${maxId}`;
+            await conn.execute(resetQuery);
+        } else {
+            statusCode = 400;
+            message = 'failed';
+        }
         res.status(statuCode).json({
             statuCode,
             message

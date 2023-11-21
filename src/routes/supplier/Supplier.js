@@ -66,10 +66,15 @@ router.delete('/supplier/:id', async (req, res) => {
         const { id } = req.params
         const data = await conn.execute(`DELETE FROM suppliers WHERE supplier_id = ?`, [id])
         var statusCode = 200, message = 'success';
-        if (data.rowCount > 0) {
+        console.log(data[0].affectedRows);
+        if (data[0].affectedRows > 0) {
             const tableName = 'suppliers';
             const columnName = 'supplier_id';
-            const resetQuery = `SELECT setval('${tableName}_${columnName}_seq', (SELECT COALESCE(MAX(${columnName}), 0) + 1 FROM ${tableName}), false)`;
+            const maxIdQuery = `SELECT COALESCE(MAX(${columnName}), 0) + 1 AS max_id FROM ${tableName}`;
+            const [maxIdData] = await conn.execute(maxIdQuery);
+            const maxId = maxIdData[0].max_id;
+            
+            const resetQuery = `ALTER TABLE ${tableName} AUTO_INCREMENT = ${maxId}`;
             await conn.execute(resetQuery);
         } else {
             statusCode = 400,

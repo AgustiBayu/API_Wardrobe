@@ -6,11 +6,20 @@ router.get('/ordermo', async (req, res) => {
     try {
         const conn = await getConnection()
         const data = await conn.execute(`SELECT 
-        a.orderMO_id, a.product_id, c.category_name, b.product_name , a.quantity, a.total , a.status ,a.tanggal FROM order_mo a
+        a.orderMO_id, 
+        a.product_id, 
+        c.category_name, 
+        b.product_name , 
+        a.quantity, 
+        a.total , 
+        a.status ,
+        a.tanggal 
+        FROM order_mo a
         INNER JOIN products b
         ON a.product_id = b.product_id
         INNER JOIN product_categories c
-        on b.category_id = c.category_id`)
+        on b.category_id = c.category_id
+        order by a.orderMO_id`)
         res.status(200).json(data[0]);
     } catch (e) {
         res.status(400).json({
@@ -74,20 +83,20 @@ router.delete('/ordermo/:id', async (req, res) => {
         let statusCode = 200;
         let message = 'success';
         
-        // if (data[0].affectedRows > 0) {
-        //     const tableName = 'order_mo';
-        //     const columnName = 'orderMO_id';
+        if (data[0].affectedRows > 0) {
+            const tableName = 'order_mo';
+            const columnName = 'orderMO_id';
 
-        //     const maxIdQuery = `SELECT COALESCE(MAX(${columnName}), 0) + 1 AS max_id FROM ${tableName}`;
-        //     const [maxIdData] = await conn.execute(maxIdQuery);
-        //     const maxId = maxIdData[0].max_id;
+            const maxIdQuery = `SELECT COALESCE(MAX(${columnName}), 0) + 1 AS max_id FROM ${tableName}`;
+            const [maxIdData] = await conn.execute(maxIdQuery);
+            const maxId = maxIdData[0].max_id;
             
-        //     const resetQuery = `ALTER TABLE ${tableName} AUTO_INCREMENT = ${maxId}`;
-        //     await conn.execute(resetQuery);
-        // } else {
-        //     statusCode = 400;
-        //     message = 'failed';
-        // }
+            const resetQuery = `ALTER TABLE ${tableName} AUTO_INCREMENT = ${maxId}`;
+            await conn.execute(resetQuery);
+        } else {
+            statusCode = 400;
+            message = 'failed';
+        }
 
         console.log(data[0]);
         res.status(statusCode).json({

@@ -31,7 +31,8 @@ router.get('/product', async (req, res) => {
             a.product_stock
             from products a
         LEFT JOIN product_categories b 
-        on a.category_id = b.category_id`)
+        on a.category_id = b.category_id
+        order by a.product_id`)
         res.status(200).json(data[0])
     } catch (e) {
         res.status(400), json({
@@ -99,24 +100,21 @@ router.delete('/product/:id', async (req, res) => {
     try {
         const conn = await getConnection()
         const id = parseInt(req.params.id, 10);
-        const dataImage = await conn.execute(`SELECT image from products WHERE product_id = ?`, [id])
         const data = await conn.execute(`DELETE FROM products WHERE product_id = ?`, [id])
         var statusCode = 200, message = 'success';
-        // if (data[0] > 0) {
-        //     fs.unlink('./uploads/' + dataImage[0][0].image, (err) => {
-        //         if (err) {
-        //             console.log('image e ', err)
-        //         }
-        //     })
-        //     const tableName = 'products';
-        //     const columnName = 'product_id';
-        //     const resetQuery = `SELECT setval('${tableName}_${columnName}_seq', (SELECT COALESCE(MAX(${columnName}), 0) + 1 FROM ${tableName}), false)`;
-        //     await conn.execute(resetQuery);
-        // } else {
-        //     statusCode = 400,
-        //         message = 'failed'
-        //     console.log(data[0].affectedRows);
-        // }
+        if(data[0].affectedRows > 0) {
+            const tableName = 'products';
+            const columnName = 'product_id';
+            const maxIdQuery = `SELECT COALESCE(MAX(${columnName}), 0) + 1 AS max_id FROM ${tableName}`;
+            const [maxIdData] = await conn.execute(maxIdQuery);
+            const maxId = maxIdData[0].max_id;
+
+            const resetQuery = `ALTER TABLE ${tableName} AUTO_INCREMENT = ${maxId}`;
+            await conn.execute(resetQuery);
+        } else {
+            statusCode = 400;
+            message = 'failed';
+        }
         res.status(statusCode).json({
             statusCode,
             message
