@@ -12,7 +12,8 @@ const CustomerRoute = require("./src/routes/customer/Customer.js");
 const OrderRoute = require('./src/routes/order/Order.js');
 const OrderDetailRoute = require('./src/routes/order_detail/OrderDetail.js');
 const OrderMoRoute = require('./src/routes/order_mo/Order_Mo.js');
-const PurchesOrderRoute = require('./src/routes/purchase_order/PurchaseOrder.js');
+const PurchaseOrderRoute = require('./src/routes/purchase_order/PurchaseOrder.js');
+const PaymentPoRoute = require('./src/routes/payment_po/PaymentPo.js');
 const cors = require("cors");
 
 app.use(express.json())
@@ -33,7 +34,8 @@ app.use('/api', ProductRoute)
 app.use('/api', MaterialProductRoute)
 app.use('/api', OrderDetailRoute)
 app.use('/api', OrderMoRoute)
-app.use("/api", PurchesOrderRoute);
+app.use("/api", PurchaseOrderRoute);
+app.use("/api", PaymentPoRoute);
 
 app.listen(port, () => {
   console.log(`app running on port http://localhost:${port}/api`);
