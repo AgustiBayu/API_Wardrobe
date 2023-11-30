@@ -29,6 +29,7 @@ app.use(
 
 app.use('/api', ProductCategoryRoute)
 app.use('/api', SupplierRoute)
+app.use('/api', CustomerRoute)
 app.use('/api', MaterialRoute)
 app.use('/api', ProductRoute)
 app.use('/api', MaterialProductRoute)
@@ -36,6 +37,7 @@ app.use('/api', OrderDetailRoute)
 app.use('/api', OrderMoRoute)
 app.use("/api", PurchaseOrderRoute);
 app.use("/api", PaymentPoRoute);
+app.use("/api", OrderRoute);
 
 app.listen(port, () => {
   console.log(`app running on port http://localhost:${port}/api`);

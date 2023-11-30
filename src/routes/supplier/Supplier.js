@@ -66,7 +66,6 @@ router.delete('/supplier/:id', async (req, res) => {
         const { id } = req.params
         const data = await conn.execute(`DELETE FROM suppliers WHERE supplier_id = ?`, [id])
         var statusCode = 200, message = 'success';
-        console.log(data[0].affectedRows);
         if (data[0].affectedRows > 0) {
             const tableName = 'suppliers';
             const columnName = 'supplier_id';
