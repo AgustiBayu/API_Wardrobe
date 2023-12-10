@@ -11,8 +11,9 @@ exports.up = function(knex) {
         table.integer('quantity_receive').nullable().defaultTo(0);
         table.integer('total').notNullable();
         table.date('order_date').notNullable();
+        table.date('invoice_date').nullable().defaultTo(null);
         table.string('order_status').notNullable();
-        table.string('payment_status').notNullable();
+        table.string('invoice_status').notNullable();
         table.foreign('customer_id').references('customer_id').inTable('customers')
         table.foreign('product_id').references('product_id').inTable('products')
     })

@@ -1,13 +1,13 @@
 const express = require('express')
-const { mysqlDB, getConnection } = require('../../../db.js')
-const router = express.Router();
+const { mysqlDB, getConnection} = require('../../../db.js')
+const router = express.Router()
 
-router.post('/order', async (req, res) => {
+router.post('/paymentSo', async (req, res) => {
     const conn = await getConnection()
     try {
-        const { customerId, productId, quantityDemand, total, tanggalOrder, orderStatus, paymentStatus } = req.body
-        const data = await conn.execute(`INSERT INTO orders VALUES(DEFAULT, ?, ?, ?, DEFAULT, ?, ?, DEFAULT, ?, ?)`,
-        [customerId, productId, quantityDemand, total, tanggalOrder, orderStatus, paymentStatus])
+        const { orderSoId, customerId, total, tanggal, paymentStatus} = req.body
+        const data = await conn.execute(`INSERT INTO payment_so VALUES(DEFAULT, ?, ?, ?, null, ?, ?)`,
+        [ orderSoId, customerId, total, tanggal, paymentStatus])
         statusCode = 200, message = 'success'
         if (data[0].affectedRows == 0) {
             statusCode = 400,
@@ -25,30 +25,25 @@ router.post('/order', async (req, res) => {
     }
 })
 
-router.get('/order', async (req, res) => {
+router.get('/paymentSo', async (req, res) => {
     const conn = await getConnection()
     try {
         const data = await conn.execute(`
         SELECT 
-        a.order_id, 
+        a.paymentSO_id, 
         a.customer_id, 
         c.customer_name,  
-        a.product_id, 
-        b.product_name,
-        b.price,
-        a.quantity_demand, 
-        a.quantity_receive,
-        a.total, 
-        a.order_date, 
-        a.invoice_date, 
-        a.order_status, 
-        a.invoice_status
-        FROM orders a
-        INNER JOIN products b
-        ON a.product_id = b.product_id
+        a.order_id, 
+        a.total,
+        a.bank, 
+        a.tanggal, 
+        a.payment_status
+        FROM payment_so a
+        INNER JOIN orders b
+        ON a.order_id = b.order_id
         INNER JOIN customers c
-        on a.customer_id = c.customer_id
-        order by a.order_id`)
+        on b.customer_id = c.customer_id
+        order by a.paymentSO_id`)
         res.status(200).json(data[0]);
     } catch (e) {
         res.status(400).json({
@@ -58,16 +53,14 @@ router.get('/order', async (req, res) => {
     }
 })
 
-router.put('/order/:id', async (req, res)=> {
+router.put('/paymentSo/:id', async (req, res) => {
     const conn = await getConnection()
     try {
-        const { customerId, productId, quantityDemand, quantityReceive,
-            total, tanggalOrder, tanggalInvoice, orderStatus, paymentStatus } = req.body
+        const { orderSoId, customerId, total, bank, tanggal, paymentStatus} = req.body
         const id = req.params.id
-        const data = await conn.execute(`UPDATE orders SET customer_id = ?, product_id = ?,
-        quantity_demand = ?, quantity_receive = ?, total = ?, order_date = ?, invoice_date = ?, order_status = ?,
-        invoice_status = ? WHERE order_id = ?`, [customerId, productId, quantityDemand, quantityReceive,
-            total, tanggalOrder, tanggalInvoice, orderStatus, paymentStatus, id])
+        const data = await conn.execute(`UPDATE payment_so SET order_id = ?, customer_id = ?,
+        total = ?, bank = ?, tanggal = ?, payment_status = ? WHERE paymentSO_id = ?`, 
+        [orderSoId, customerId, total, bank, tanggal, paymentStatus, id])
         statusCode = 200, message = 'success'
         if (data.rowCount == 0) {
             statusCode = 400,
@@ -84,15 +77,15 @@ router.put('/order/:id', async (req, res)=> {
         })
     }
 })
-router.delete('/order/:id', async (req, res) => {
+router.delete('/paymentSo/:id', async (req, res) => {
     const conn = await getConnection()
     try {
         const {id} = req.params
-        const data = await conn.execute(`DELETE FROM orders WHERE order_id = ?`, [id])
+        const data = await conn.execute(`DELETE FROM payment_so WHERE paymentSO_id = ?`, [id])
         statusCode = 200, message = 'success'
         if(data[0].affectedRows > 0) {
-            const tableName = 'orders'
-            const columnName = 'order_id'
+            const tableName = 'payment_so'
+            const columnName = 'paymentSO_id'
             const maxIdQuery = `SELECT COALESCE(MAX(${columnName}), 0) + 1 AS max_id FROM ${tableName}`;
             const [maxIdData] = await conn.execute(maxIdQuery);
             const maxId = maxIdData[0].max_id;
@@ -114,4 +107,5 @@ router.delete('/order/:id', async (req, res) => {
         })
     }
 })
+
 module.exports = router
